@@ -1,0 +1,391 @@
+---
+title: "Manipulação de imagens"
+author: "Artur Almeida, Brenda Assis, Eraldo Jair e Rafael Yui"
+date: "24 de agosto de 2022"
+output:
+  slidy_presentation: default
+  beamer_presentation:
+    editor_options: null
+  chunk_output_type: console
+  ioslides_presentation: default
+---
+
+```{r setup, include=FALSE}
+require("magick")
+require("OpenimageR")
+require("imager")
+require("seriation")
+```
+# Sumário
+
+- Introdução
+  - imagens digitais
+  - imagens vetoriais e imagens raster
+  - Formatos de imagens
+    -Formatos vetoriais
+    -Formatos raster
+- Lendo imagens
+- Escrevendo imagens
+- Manipulação de constraste
+
+# imagens digitais
+
+-   imagem é representação visual de uma pessoa ou de um objeto.
+
+-   Já imagem digital é a representação de uma imagem bidimensional usando números binários codificados de modo a permitir seu armazenamento, transferência, impressão ou reprodução, e seu processamento por meios eletrônicos.
+
+-   Existem dois principais tipos de imagens que podem ser armazenadas em um computador: as imagens vetoriais e as imagens raster.
+
+# imagens vetoriais e imagens raster
+
+![image](C:/Users/User/OneDrive - unb.br/Documentos/GitHub/Manipulacao-de-imagens/images/dif.jpg){width=100%}
+
+# Formatos de imagens
+
+## Formatos vetoriais
+
+-   PDF
+-   PostScript (EPS)
+-   SVG
+
+## Formatos raster
+
+-   TIFF
+-   JPEG
+-   PNG
+-   BMP
+-   PBM
+
+# Usando o pacote Magick
+
+## Leitura
+```{r, results=T, echo=T}
+library(magick)
+ben <- image_read("images/ben.png")
+print(ben)
+```
+Uma vez que a imagem foi lida, suas informações básicas, como formato de imagem, dimensão e tamanho do arquivo podem ser extraídas usando a função:image_info()
+
+```{r}
+image_info(ben)
+```
+
+## Dimensionamento
+```{r}
+ben10 <-image_scale(image_scale(ben,"30%"),"50%")
+ben10
+```
+## Escrita
+
+```{r}
+image_write(ben10, path = "ben10.jpg", format = "jpeg", quality = 75)
+```
+
+## Conversão de formato
+```{r}
+ben10_jpeg <- image_convert(ben10, format ="jpeg" )
+image_info(ben10_jpeg)
+```
+
+
+## Mudança de bordas e fundo
+
+```{r}
+image_border(ben10, color = "green", 
+             geometry = "10x10",operator = "copy")
+```
+```{r}
+image_border(image_background(ben10, "yellow"), "green", "10x10")
+```
+
+# Corte de bordas
+
+```{r}
+image_trim(ben10, fuzz=50)
+```
+# Crop images
+```{r}
+image_crop(ben10, "150x130")
+```
+
+# Rotação e espelhamento
+```{r}
+image_rotate(ben10, 45)
+```
+```{r}
+image_flip(ben10)
+```
+```{r}
+image_flop(ben10)
+```
+# Modulação e pintura
+
+```{r}
+image_modulate(ben10, brightness = 100, saturation = 200, hue = 100)
+```
+
+```{r}
+image_fill(ben10, "blue", point = "+50+200", fuzz = 20)
+```
+# Anotações de texto
+```{r}
+image_annotate(ben10, text = "Ben 10", size = 20,
+               degrees = -10, font = "Georgia",
+               color = "green",
+               location = "+40+135",
+               style = "italic", 
+               boxcolor = "lightblue")
+```
+# Sobreposição de imagens
+
+```{r}
+bigdata <- image_read("images/bigdata.jpg")
+rlogo <- image_read("images/Rlogo.jpg")
+sobre <- c(bigdata,rlogo, ben10)
+sobre <- image_scale(sobre, "300x300")
+image_info(sobre)
+```
+
+## imprimir imagens umas sobre as outras
+
+```{r}
+image_mosaic(sobre)
+```
+## Crie uma única imagem que tenha o tamanho da primeira imagem
+```{r}
+image_flatten(sobre)
+```
+## Adicionando imagens
+
+```{r}
+image_flatten(sobre, "add")
+```
+## Modulate
+```{r}
+image_flatten(sobre, "modulate")
+```
+## Minus
+```{r}
+image_flatten(sobre, "minus")
+```
+## Colocando imagens uma ao lado de outra
+```{r}
+image_append(image_scale(sobre, "x200"))
+```
+# Empilhando
+```{r}
+image_append(image_scale(sobre, "100"), stack = TRUE) 
+```
+# Combinar imagens em posições específicas
+```{r}
+bigdataben10 <- image_scale(image_rotate(image_background(ben10, "none"), 400), "x200")
+image_composite(image_scale(bigdata, "x300"), bigdataben10, offset = "+200+50")
+```
+
+## Alguns efeitos
+
+```{r}
+image_oilpaint(ben10, radius = 1)
+```
+
+```{r}
+image_implode(ben10, factor = 0.5)
+```
+
+```{r}
+image_charcoal(ben10, radius = 1, sigma = 0.5)
+```
+
+```{r}
+image_blur(ben10, radius = 1, sigma = 0.5)
+```
+
+```{r}
+image_edge(ben10, radius = 1)
+```
+
+```{r}
+image_negate(ben10)
+```
+```{r}
+image_noise(ben10, noisetype = "uniform")
+```
+
+```{r}
+image_noise(ben10, noisetype = "Multiplicative Gaussian")
+```
+
+# Criação de GIFs
+
+# Alguns recursos do pacote imager
+
+# Lendo uma imagem
+```{r}
+library("imager")
+ocean <- load.image("C:/Users/User/OneDrive - unb.br/Documentos/GitHub/Manipulacao-de-imagens/images/ocean.jpg")
+plot(ocean)
+```
+
+# Quadtrees
+
+```{r}
+library(imager)
+library(purrr)
+
+setwd("C:/Users/User/OneDrive - unb.br/Documentos/GitHub/Manipulacao-de-imagens/images")
+
+ocn <- load.image('ocean.jpg') %>% imaresize(.5)
+
+#Dividir ao longo de x, e depois y
+qsplit <- function(ocn)
+{
+    imsplit(ocn,"x",2) %>% map(~ imsplit(.,"y",2)) %>%
+        flatten 
+}
+
+qsplit(ocn) %>% as.imlist %>% plot
+```
+
+A operação inversa usa "imappend":
+```{r}
+qunsplit <- function(l)
+{
+    list(l[1:2],l[3:4]) %>% map(~ imappend(.,"y")) %>% imappend("x")
+}
+
+qsplit(ocn) %>% qunsplit %>% plot
+```
+
+```{r}
+#Max std. dev imoss channels
+imsd <- function(ocn)
+{
+    imsplit(ocn,"c") %>% map_dbl(sd) %>% max
+}
+```
+
+```{r}
+refine <- function(l)
+{
+    if (is.cimg(l)) #We have a leaf
+    {
+        qs <- qsplit(l) #Split
+        if (any(dim(l)[1:2] <= 4)) #Quadrants are very small
+        {
+            qs$sds <- rep(0,4) #Prevent further refinement
+        }
+        else
+        {
+            qs$sds <- map_dbl(qs,imsd) #Store std.dev of children
+        }
+        qs
+    }
+    else #Not a leaf, explore further
+    {
+        indm <- which.max(l$sds) #Find child with max. std. dev
+        l[[indm]] <- refine(l[[indm]]) #Refine
+        l$sds[indm] <- max(l[[indm]]$sds) #Update std. dev
+        l
+    }
+}
+```
+
+```{r}
+rebuild <- function(l,borders=FALSE)
+{
+    map(l[-5],~ if (is.cimg(.)) meanim(.,borders=borders) else rebuild(.,borders=borders)) %>% qunsplit
+}
+
+#Produce an image that's just the average of image im
+#Optionally, add borders
+meanim <- function(ocn,borders=FALSE)
+{
+    ocn <- imgsplit(ocn,"c") %>% map(~ 0*. + mean(.)) %>% imappend("c")
+    if (borders)
+    {
+        ocn[px.borders(ocn)] <- 0
+    }
+    ocn
+}
+```
+
+```{r}
+iter.refine <- function(ocn,nIter)
+{
+    for (i in seq_len(nIter)) { ocn <- refine(ocn) };
+    ocn
+}
+
+#The first four iterations of the process
+map_il(1:4,~ iter.refine(ocn,.) %>% rebuild) %>% plot
+```
+
+```{r}
+iter.refine(ocn,1000) %>% rebuild(borders=T) %>% plot
+```
+
+# Embaralhar colunas de uma imagem, e colocá-la de volta
+
+```{r}
+library(imager)
+library(purrr)
+set.seed(2)
+
+im <- load.image("acropolis.jpg")
+
+##reorder the columns of an image
+scramble <- function(im)
+{
+    imsplit(im,"x") %>% { .[sample(length(.))] } %>% imappend("x") 
+}
+scramble(im) %>% plot
+```
+
+```{r}
+imlist(im,scramble(im)) %>% plot(layout="row")
+```
+
+```{r}
+library(seriation)
+
+unscramble <- function(im.s,method="TSP",...)
+{
+    cols <- imsplit(im.s,"x")
+    #Compute a distance matrix (using L1 - Manhattan - distance)
+    #Each entry D_ij compares column i to column j  
+    D <- map(cols,as.vector) %>% do.call(rbind,.) %>% dist(method="manhattan")
+    out <- seriate(D,method=method,...)
+    cols[get_order(out)] %>% imappend("x") 
+}
+
+scramble(im) %>% unscramble %>% plot(main="Unscrambled image")
+```
+
+```{r}
+scramble <- function(im,axis="x")
+{
+    imsplit(im,axis) %>% { .[sample(length(.))] } %>% imappend(axis) 
+}
+
+
+unscramble <- function(im,axis="x",method="TSP",...)
+{
+    cols <- imsplit(im,axis)
+    #Compute a distance matrix (using L1 - Manhattan - distance)
+    #Each entry D_ij compares column i to column j  
+    D <- map(cols,as.vector) %>% do.call(rbind,.) %>% dist(method="manhattan")
+    out <- seriate(D,method=method,...)
+    cols[get_order(out)] %>% imappend(axis) 
+}
+
+im <- scramble(im,"x") %>% scramble("y")
+
+#The double scramble produces an unrecognisable mess
+plot(im)
+```
+
+```{r}
+unscramble(im,"y") %>% unscramble("x") %>% plot
+```
+
+## Referencias bibliográficas
