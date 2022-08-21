@@ -1,5 +1,5 @@
 ---
-title: "Manipulação de imagens"
+title: "Manipulação de Imagens"
 author: "Artur Almeida, Brenda Assis, Eraldo Jair e Rafael Yui"
 date: "24 de agosto de 2022"
 output:
@@ -28,6 +28,8 @@ require("seriation")
 
 # Sumário
 ***
+## Sumário
+
 1. Introdução;
     - Tipos de formatos de imagens digitais.
     
@@ -43,9 +45,9 @@ require("seriation")
 # Introdução
 
 
-## Imagens Digitais
+## Imagens digitais
 
-> - Imagem digital é a representação de uma imagem bidimensional usando números binários codificados de modo a permitir seu armazenamento, transferência, impressão ou reprodução, e seu processamento por meios eletrônicos.
+> - Imagem digital é uma representação de uma imagem bidimensional usando números binários codificados de modo a permitir seu armazenamento, transferência, impressão ou reprodução, e seu processamento por meios eletrônicos.
 
 > - Existem dois principais tipos de imagens que podem ser armazenadas em um computador: as imagens vetoriais e as imagens raster.
 
@@ -64,30 +66,41 @@ require("seriation")
 > - BMP
 > - PBM
 
+## Leitura de imagens
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+setwd("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens")
+```
+
+```{r, echo=FALSE}
+## Leitura no pacote magick
+im <- image_read("ben.jpg")
+print(im)
+
+# Leitura no pacote imager
+im1 <- load.image("ben.jpg")
+plot(im1)
+
+# Leitura no pacote EBImage
+library("EBImage")
+im2 <- readImage("ben.jpg")
+display(im2)
+```
+
+![]("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/Leitura.png"){width=75%}
+
+
 # Pacote Magick
 
-## Leitura de imagem
+## Leitura
 
 ```{r, echo=FALSE}
 setwd("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images")
 ```
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-# Leitura de imagem no pacote magick
-library("magick")
-ben <- image_read("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/ben.png")
+ben <- image_read("ben.png")
 print(ben)
-```
-
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-
-```
-
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-# Leitura de imagem no pacote IMager
-library("imager")
-ben_ima <- load.image("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/ben.png")
-plot(ben_ima)
 ```
 
 ## Dimensionamento
@@ -239,16 +252,201 @@ image_negate(ben10)
 image_noise(ben10, noisetype = "Multiplicative Gaussian")
 ```
 
+# GIFs
+
+# Pacote EBImage
+
+# Pacote Imager
+
+## Lendo uma imagem
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library("imager")
+ocean <- load.image("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/ocean.jpg")
+plot(ocean)
+```
+
+## Quadtrees (filtro geométrico)
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(imager)
+library(purrr)
+ocn <- load.image("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/ocean.jpg") %>% imresize(.5)
+
+#Dividir ao longo de x, e depois y
+qsplit <- function(ocn)
+{
+    imsplit(ocn,"x",2) %>% map(~ imsplit(.,"y",2)) %>%
+        flatten 
+}
+qsplit(ocn) %>% as.imlist %>% plot
+```
+
+## Quadtrees (filtro geométrico)
+
+> - A operação inversa usa "imappend":
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+qunsplit <- function(l)
+{
+    list(l[1:2],l[3:4]) %>% map(~ imappend(.,"y")) %>% imappend("x")
+}
+
+qsplit(ocn) %>% qunsplit %>% plot
+```
+
+## Quadtrees (filtro geométrico)
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+#Max std. dev imoss channels
+imsd <- function(ocn)
+{
+    imsplit(ocn,"c") %>% map_dbl(sd) %>% max
+}
+```
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+refine <- function(l)
+{
+    if (is.cimg(l)) #We have a leaf
+    {
+        qs <- qsplit(l) #Split
+        if (any(dim(l)[1:2] <= 4)) #Quadrants are very small
+        {
+            qs$sds <- rep(0,4) #Prevent further refinement
+        }
+        else
+        {
+            qs$sds <- map_dbl(qs,imsd) #Store std.dev of children
+        }
+        qs
+    }
+    else #Not a leaf, explore further
+    {
+        indm <- which.max(l$sds) #Find child with max. std. dev
+        l[[indm]] <- refine(l[[indm]]) #Refine
+        l$sds[indm] <- max(l[[indm]]$sds) #Update std. dev
+        l
+    }
+}
+```
+
+## Quadtrees (filtro geométrico)
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+rebuild <- function(l,borders=FALSE)
+{
+    map(l[-5],~ if (is.cimg(.)) meanim(.,borders=borders) else rebuild(.,borders=borders)) %>% qunsplit
+}
+
+#Produce an image that's just the average of image im
+#Optionally, add borders
+meanim <- function(ocn,borders=FALSE)
+{
+    ocn <- imsplit(ocn,"c") %>% map(~ 0*. + mean(.)) %>% imappend("c")
+    if (borders)
+    {
+        ocn[px.borders(ocn)] <- 0
+    }
+    ocn
+}
+```
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+iter.refine <- function(ocn,nIter)
+{
+    for (i in seq_len(nIter)) { ocn <- refine(ocn) };
+    ocn
+}
+
+#The first four iterations of the process
+map_il(1:4,~ iter.refine(ocn,.) %>% rebuild) %>% plot
+```
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+iter.refine(ocn,1000) %>% rebuild(borders=T) %>% plot
+```
+
+# Unshuffling image
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(imager)
+library(purrr)
+set.seed(2)
+
+acr <- load.image("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/acropolis.jpg")
+
+##reorder the columns of an image
+scramble <- function(acr)
+{
+    imsplit(acr,"x") %>% { .[sample(length(.))] } %>% imappend("x") 
+}
+scramble(acr) %>% plot
+```
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+imlist(acr,scramble(acr)) %>% plot(layout="row")
+```
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(seriation)
+
+unscramble <- function(acr.s,method="TSP",...)
+{
+    cols <- imsplit(acr.s,"x")
+    #Compute a distance matrix (using L1 - Manhattan - distance)
+    #Each entry D_ij compares column i to column j  
+    D <- map(cols,as.vector) %>% do.call(rbind,.) %>% dist(method="manhattan")
+    out <- seriate(D,method=method,...)
+    cols[get_order(out)] %>% imappend("x") 
+}
+
+scramble(acr) %>% unscramble %>% plot(main="Unscrambled image")
+```
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+scramble <- function(acr,axis="x")
+{
+    imsplit(acr,axis) %>% { .[sample(length(.))] } %>% imappend(axis) 
+}
+
+
+unscramble <- function(acr,axis="x",method="TSP",...)
+{
+    cols <- imsplit(acr,axis)
+    #Compute a distance matrix (using L1 - Manhattan - distance)
+    #Each entry D_ij compares column i to column j  
+    D <- map(cols,as.vector) %>% do.call(rbind,.) %>% dist(method="manhattan")
+    out <- seriate(D,method=method,...)
+    cols[get_order(out)] %>% imappend(axis) 
+}
+
+acr.r<- scramble(acr,"x") %>% scramble("y")
+
+#The double scramble produces an unrecognisable mess
+plot(acr.r)
+```
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+# Inverter a imagem
+unscramble(acr,"y") %>% unscramble("x") %>% 
+  plot
+```
+
+# Bibliografia
+
+***
+
 ## Bibliografia
 
-> - [Imagens digitais](https://pt.wikipedia.org/wiki/Imagem_digital)
+> - IMAGEM DIGITAL. In: WIKIPÉDIA, a enciclopédia livre. Flórida: Wikimedia Foundation, 2019. Disponível em: [https://pt.wikipedia.org/w/index.php?title=Imagem_digital&oldid=54917444](). Acesso em: 20 ago. 2022.
 
-> - [Site sobre o pacote Imager](https://dahtah.github.io/imager/)
+> - Equipe editorial de Conceito.de. Conceito de imagem digital. **Conceito.de**, 2014. Disponível em [https://conceito.de/imagem-digital](). Acesso em 18 ago. 2022.
 
-> - [Site sobre o pacote Magick](https://www.datanovia.com/en/blog/easy-image-processing-in-r-using-the-magick-package/#:~:text=Key%20R%20functions%3A%20image_read%20%28path%2C%20density%20%3D%20NULL%2C,%3D%20NULL%2C%20depth%20%3D%20NULL%2C%20antialias%20%3D%20NULL%29)
+> - BARTHELMÉ, Simon. IMAGER: an R package for image processing. **Github**. [https://dahtah.github.io/imager/](). Acesso em 20 ago. 2022.
 
-> - Frery, Alejandro & Perciano, Talita. (2013). **Introduction to Image Processing Using R: Learning by Examples**. 10.1007/978-1-4471-4950-7. Disponível em: [https://www.programmer-books.com/wp-content/uploads/2019/10/Introduction-To-Image-Processing-Using-R.pdf](). Acesso em 20 de agosto de 2022
+## Bibliografia
 
+> - KASSAMBARA, Alboukadel. EASY image processing in r using the magick package.**DataNovia**. Disponível em: [https://www.datanovia.com/en/blog/easy-image-processing-in-r-using-the-magick-package/](). Acesso em 19 ago. 2022.
 
+> - Frery, Alejandro & Perciano, Talita. (2013). **Introduction to Image Processing Using R: Learning by Examples**. 10.1007/978-1-4471-4950-7. Disponível em: [https://www.programmer-books.com/wp-content/uploads/2019/10/Introduction-To-Image-Processing-Using-R.pdf](). Acesso em: 19 ago. 2022.
+
+> - AZEVEDO, Alcinei Mistico. **Aula 5a: Manipulações básicas em imagens no software R**. YOUTUBE, 15 Dez. 2020. Disponível em: [https://www.youtube.com/watch?v=DeP9MUb-P3o](). Acesso em 19 ago. 2022.
 
 
