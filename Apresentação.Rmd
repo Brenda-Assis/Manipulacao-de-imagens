@@ -4,7 +4,8 @@ author: "Artur Almeida, Brenda Assis, Eraldo Jair e Rafael Yui"
 date: "24 de agosto de 2022"
 output:
   ioslides_presentation:
-    logo: C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/marcaunb.png
+    logo: "C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/marcaunb.png"
+  beamer_presentation: default
 ---
 
 ```{r setup, include=FALSE}
@@ -31,16 +32,17 @@ require("seriation")
 ## Sumário
 
 1. Introdução;
-    - Tipos de formatos de imagens digitais.
+    - Tipos e formatos de imagens digitais;
     
-2. Pacote Magick;
-    - Processamento e manipulação de imagens.
+2. Leitura de imagens;
     
-3. GIFs;
+3. Pacote Magick;
+    
+4. GIFs;
 
-4. Pacote EBImage;
+5. Pacote EBImage;
 
-5. Pacote Imager.
+6. Filtro geométrico do pacote Imager.
 
 # Introdução
 
@@ -57,49 +59,58 @@ require("seriation")
 
 ## Formatos de imagens
 
-> - PDF
-> - PostScript (EPS)
-> - SVG
-> - TIFF
+> - PDF (Formato de Documento Portátil)
+> - EPS (Encapsulated PostScript)
+> - SVG (Gráficos vetoriais escalonáveis)
+> - TIFF (Formato de arquivo de imagem marcado)
 > - JPEG
 > - PNG
 > - BMP
 > - PBM
 
+# Leitura de imagens
+
 ## Leitura de imagens
 
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-setwd("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens")
-```
-
-```{r, echo=FALSE}
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
 ## Leitura no pacote magick
-im <- image_read("ben.jpg")
+library(magick)
+im <- image_read("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/vinho.jpg")
 print(im)
 
 # Leitura no pacote imager
-im1 <- load.image("ben.jpg")
+library(imager)
+im1 <- load.image("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/vinho.jpg")
 plot(im1)
 
 # Leitura no pacote EBImage
-library("EBImage")
-im2 <- readImage("ben.jpg")
-display(im2)
+library(EBImage)
+im2 <- readImage("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/vinho.jpg")
+plot (im2)
 ```
 
-![]("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/Leitura.png"){width=75%}
+## Leitura de imagens
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/leitura.png){width=100%}
 
+## Leitura de imagens
+```{r, echo=TRUE, message=TRUE, warning=FALSE, paged.print=FALSE, results='hide'}
+#Mudando a resolução de uma imagem
+
+im2_1 <-resize(x=im2, w=1200)
+
+im2_2 <- resize(x=im2,w=500,h=500)
+
+```
+
+## Leitura de imagens
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/resize.png){width=100%}
 
 # Pacote Magick
 
 ## Leitura
 
-```{r, echo=FALSE}
-setwd("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images")
-```
-
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-ben <- image_read("ben.png")
+ben <- image_read("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/ben.png")
 print(ben)
 ```
 
@@ -161,6 +172,40 @@ image_modulate(ben10, brightness = 100, saturation = 200, hue = 100)
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 image_fill(ben10, color = "blue", point = "+100+200", fuzz = 20)
 ```
+## Efeitos
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+image_oilpaint(ben10, radius = 5)
+```
+
+## Efeitos
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+image_implode(ben10, factor = 0.5)
+```
+
+## Efeitos
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+image_charcoal(ben10, radius = 1, sigma = 0.5)
+```
+
+## Efeitos
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+image_edge(ben10, radius = 1)
+```
+
+## Efeitos
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+image_blur(ben10, radius = 10, sigma = 5)
+```
+
+## Efeitos
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+image_negate(ben10)
+```
+
+## Efeitos
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+image_noise(ben10, noisetype = "Multiplicative Gaussian")
+```
 
 ## Anotações de texto
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
@@ -217,49 +262,60 @@ image_composite(image_scale(bigdata, "x500"),
                 bigdataben10, offset = "+400+50")
 ```
 
-## Efeitos
+## Sobreposição de imagens em gráficos
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-image_oilpaint(ben10, radius = 5)
+require("png")
+require("ggplot2")
+require("ggpubr")
+library(png)
+library(ggplot2)
+library(ggpubr)
+
+spaceimage <- "C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/space.png"
+
+img <- png::readPNG(spaceimage)
+graph <- ggplot(mpg, aes(x=class, y=hwy, fill=class))
+graph <- graph + background_image(img)
+graph <- graph + geom_boxplot(aes(fill=class), color= "white", alpha=0.1)
 ```
 
-## Efeitos
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-image_implode(ben10, factor = 0.5)
+## Sobreposição de imagens em gráficos
+```{r}
+graph
 ```
 
-## Efeitos
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-image_charcoal(ben10, radius = 1, sigma = 0.5)
+## Sobreposição de imagens em gráficos
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+install.packages("palmerpenguins")
+library(tidyverse)
+library(palmerpenguins)
+
+penguins %>%
+  count(species) %>%
+  ggplot() + geom_col(aes(x = species, y = n, fill = species)) +
+  geom_label(aes(x = species, y = n, label = n)) +
+  scale_fill_manual(values = c("darkorange","purple","cyan4")) +
+  theme_minimal() +
+  labs(title = 'Penguins Species & Count')
 ```
 
-## Efeitos
+## Sobreposição de imagens em gráficos
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-image_edge(ben10, radius = 1)
-```
-
-## Efeitos
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-image_blur(ben10, radius = 10, sigma = 5)
-```
-
-## Efeitos
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-image_negate(ben10)
-```
-
-## Efeitos
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-image_noise(ben10, noisetype = "Multiplicative Gaussian")
+library(magick)
+barpenguin <- image_read("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/barpenguin.png")
+adelie <- image_read("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/adelie.jpg")
+adelie_menor <- image_scale(adelie, "50%")
+adelie_menor
 ```
 
 # GIFs
 
 # Pacote EBImage
 
-# Pacote Imager
+# Filtro geométrico do pacote Imager
 
-## Lendo uma imagem
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+```{r, echo=FALSE}
 library("imager")
 ocean <- load.image("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/ocean.jpg")
 plot(ocean)
@@ -447,6 +503,15 @@ unscramble(acr,"y") %>% unscramble("x") %>%
 
 > - Frery, Alejandro & Perciano, Talita. (2013). **Introduction to Image Processing Using R: Learning by Examples**. 10.1007/978-1-4471-4950-7. Disponível em: [https://www.programmer-books.com/wp-content/uploads/2019/10/Introduction-To-Image-Processing-Using-R.pdf](). Acesso em: 19 ago. 2022.
 
+## Bibliografia
+
 > - AZEVEDO, Alcinei Mistico. **Aula 5a: Manipulações básicas em imagens no software R**. YOUTUBE, 15 Dez. 2020. Disponível em: [https://www.youtube.com/watch?v=DeP9MUb-P3o](). Acesso em 19 ago. 2022.
 
+> - TechAnswers88. **R: place a jpg or png image overlay in ggplot charts in r**. YOUTUBE, 3 set. 2020. Disponível em [https://www.youtube.com/watch?v=uKw6zp4An5Q](). Acesso em 20 ago. 2022
+
+## Bibliografia
+
+> - Gorman KB, Williams TD, Fraser WR (2014) Ecological Sexual Dimorphism and Environmental Variability within a Community of Antarctic Penguins (Genus Pygoscelis). PLoS ONE 9(3): e90081.[https://doi.org/10.1371/journal.pone.0090081]()
+
+> - PENGUINS Dataset Overview – iris alternative in R. **R-bloguers**, 2020. Disponível em: [https://www.r-bloggers.com/2020/06/penguins-dataset-overview-iris-alternative-in-r/](). Acesso em 20 ago. 2022.
 
