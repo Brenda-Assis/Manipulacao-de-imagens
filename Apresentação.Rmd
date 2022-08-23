@@ -403,7 +403,7 @@ meanim <- function(ocn,borders=FALSE)
     ocn
 }
 ```
-
+## Quadtrees (filtro geométrico)
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 iter.refine <- function(ocn,nIter)
 {
