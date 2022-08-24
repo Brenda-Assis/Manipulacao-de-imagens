@@ -340,6 +340,34 @@ image_composite(image_scale(bigdata, "x500"),
                 bigdataben10, offset = "+400+50")
 ```
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+setwd("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens")
+library(magick)
+ben <- image_read("images/ben.png")
+bengraph <-image_scale(ben,"300x300")
+bengraph
+```
+
+## Sobreposição de imagens em gráfcos
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+gmpg <- image_graph(width = 750, height = 750, res = 96)
+ggplot2::qplot(mpg, wt, data = mtcars, colour = cyl)
+out <- image_composite(gmpg, bengraph, offset = "+70+30")
+out
+```
+
+## Sobreposição de imagens em gráfcos
+```{r echo=FALSE}
+library(ggplot2)
+library(grid)
+```
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+qplot(speed, dist, data = cars, geom = c("point", "smooth"))
+grid.raster(bengraph)
+```
+
 ## Sobreposição de imagens em gráficos
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 require("jpeg")
