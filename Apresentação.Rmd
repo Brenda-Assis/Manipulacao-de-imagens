@@ -18,13 +18,16 @@ BiocManager::install("EBImage")
 # Demais pacotes
 installed.packages("magick")
 installed.packages("imager")
-installed.packages("seriation")
 require("BiocManager") 
 require("EBImage")
 require("magick")
 require("imager")
 require("EBImage")
-require("seriation")
+require(ggplot2)
+require(dplyr)
+require(tidyr)
+require(gifski)
+require(purrr)
 ```
 
 # Sumário
@@ -33,16 +36,16 @@ require("seriation")
 
 1. Introdução;
     - Tipos e formatos de imagens digitais;
+    - Processamento de imagens digitais;
+    - Leitura de imagens no r;
     
-2. Leitura de imagens;
+2. Pacote Magick;
     
-3. Pacote Magick;
-    
-4. GIFs;
+3. GIFs;
 
-5. Pacote EBImage;
+4. Keras;
 
-6. Filtro geométrico do pacote Imager.
+5. Filtro geométrico do pacote Imager.
 
 # Introdução
 
@@ -51,7 +54,7 @@ require("seriation")
 
 > - Imagem digital é uma representação de uma imagem bidimensional usando números binários codificados de modo a permitir seu armazenamento, transferência, impressão ou reprodução, e seu processamento por meios eletrônicos.
 
-> - Existem dois principais tipos de imagens que podem ser armazenadas em um computador: as imagens vetoriais e as imagens raster.
+> - Existem dois principais tipos de imagens que podem ser armazenadas em um computador: as imagens vetoriais e as imagens bitmap.
 
 ## Imagens vetoriais e Imagens bitmap
 
@@ -59,58 +62,137 @@ require("seriation")
 
 ## Formatos de imagens
 
-> - PDF (Formato de Documento Portátil)
-> - EPS (Encapsulated PostScript)
-> - SVG (Gráficos vetoriais escalonáveis)
-> - TIFF (Formato de arquivo de imagem marcado)
-> - JPEG
-> - PNG
-> - BMP
-> - PBM
+> - PDF 
+> - EPS 
+> - SVG 
+> - TIFF 
+> - JPEG 
+> - PNG 
+> - BMP 
+> - PBM 
+> - GIF 
 
-# Leitura de imagens
 
-## Leitura de imagens
+# Processamento de imagens digitais
 
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
-## Leitura no pacote magick
+## Processamento de imagens digitais
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/intro/Imagem1.jpg){width=30%}
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/intro/Imagem2.jpg){width=30%}
+
+## Processamento de imagens digitais
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/intro/Imagem3.jpg){width=50%}
+
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/intro/Imagem4.jpg){width=50%}
+
+## Espectro Eletromagnético:
+
+Quando um sensor de imagem **registra a radiação** que interagiu com objetos físicos ocorre a formação de uma imagem.
+
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/intro/Imagem5.jpg){width=70%}
+
+## Aquisição da Imagem Digital
+> - Amostragem: Digitalização dos valores das coordenadas(posição)
+> - Quantização: Digitalização dos valores de intensidade de luz(brilho)
+
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/intro/Imagem6.jpg){width=23%}
+
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/intro/Imagem7.jpg){width=23%}
+
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/intro/Imagem8.jpg){width=23%}
+
+## Anatomia do Olho Humano
+Existem três tipos de cones nos nossos olhos, cada um especializado em comprimentos de luz **curtos (S), médios (M) ou longos (L)**.
+O conjunto de sinais possíveis dos três tipos de cones define a gama de cores que conseguimos ver.
+
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/intro/Imagem9.png){width=75%}
+
+## Anatomia do Olho Humano
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/intro/Imagem10.jpg){width=50%}
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/intro/Imagem11.png){width=50%}
+
+## Sistema RGB
+
+> - Branco - RGB (255,255,255);
+> - Azul - RGB (0,0,255);
+> - Vermelho - RGB (255,0,0);
+> - Verde - RGB (0,255,0);
+> - Amarelo - RGB (255,255,0);
+> - Magenta - RGB (255,0,255);
+> - Ciano - RGB (0,255,255);
+> - Preto - RGB (0,0,0).
+
+## Efeito aditivo de cores
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/intro/Imagem12.png){width=50%}
+
+## Processamento Digital de Imagem – LANDSAT 8
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/intro/Imagem13.png){width=100%}
+
+## Processamento Digital de Imagem – Aplicações
+> - Áreas de Atuação: Bioestatística e Segurança
+
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/intro/Imagem14.png){width=100%}
+
+## Processamento Digital de Imagem – Aplicações
+> - Áreas de Atuação: Controle de Mobilidade Urbana
+
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/intro/Imagem15.png){width=60%}
+
+## Processamento Digital de Imagem – Aplicações
+> - Áreas de Atuação: Medicina e diagnósticos
+
+![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/intro/Imagem16.jpg){width=100%}
+
+## Outras Aplicações:
+
+CARTOGRAFIA:
+    - Mapeamentos Topográfico e Temático
+    - Atualização da base cartográfica
+    - Geração de cartas de navegabilidade
+
+MEIO AMBIENTE:
+    - Monitoramento ambiental
+    - Entrada e Fluxo de Efluentes
+    - Controle da expansão urbana
+    - Mapas de uso do solo
+    - Detecção de pragas
+    - Acompanhamento de Safra
+    - Inventários Florestais
+
+ENGENHARIA:
+    - Prospecção Mineral
+    - Mapeamento Geológico
+    - Planejamento Viário
+    
+# Leitura de imagens no r
+
+```{r, echo=FALSE}
+setwd("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens")
+```
+
+## Leitura de imagens no r
+```{r, echo=TRUE, fig.show='hide', warning=FALSE, results='hide'}
 library(magick)
-im <- image_read("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/vinho.jpg")
-print(im)
+im <- image_read("images/vinho.jpg")
+print (im)
 
-# Leitura no pacote imager
 library(imager)
-im1 <- load.image("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/vinho.jpg")
-plot(im1)
+im1 <- load.image("images/vinho.jpg")
+plot (im1)
 
-# Leitura no pacote EBImage
 library(EBImage)
-im2 <- readImage("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/vinho.jpg")
+im2 <- readImage("images/vinho.jpg")
 plot (im2)
 ```
 
-## Leitura de imagens
+## Leitura de imagens no r
 ![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/leitura.png){width=100%}
-
-## Leitura de imagens
-```{r, echo=TRUE, message=TRUE, warning=FALSE, paged.print=FALSE, results='hide'}
-#Mudando a resolução de uma imagem
-
-im2_1 <-resize(x=im2, w=1200)
-
-im2_2 <- resize(x=im2,w=500,h=500)
-
-```
-
-## Leitura de imagens
-![](C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/resize.png){width=100%}
 
 # Pacote Magick
 
 ## Leitura
 
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-ben <- image_read("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/ben.png")
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hold'}
+ben <- image_read("images/ben.png")
 print(ben)
 ```
 
@@ -125,11 +207,6 @@ ben10
 image_write(ben10, path = "ben10.jpg", format = "jpeg", quality = 75)
 ben10_convertido <- image_convert(ben10, format ="jpeg" )
 image_info(ben10_convertido)
-```
-
-## Mudança de fundo
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-image_background(ben, color ="navyblue", flatten = TRUE)
 ```
 
 ## Mudança de bordas
@@ -170,8 +247,9 @@ image_modulate(ben10, brightness = 100, saturation = 200, hue = 100)
 
 ## Pintura
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-image_fill(ben10, color = "blue", point = "+100+200", fuzz = 20)
+image_fill(ben10, color = "blue", point = "+120+200", fuzz = 20)
 ```
+
 ## Efeitos
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 image_oilpaint(ben10, radius = 5)
@@ -217,10 +295,10 @@ image_annotate(ben10, text = "Ben aqui", size = 50,
 
 ## Sobreposição de imagens
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-bigdata <- image_read("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/bigdata.jpg")
-rlogo <- image_read("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/Rlogo.jpg")
+bigdata <- image_read("images/bigdata.jpg")
+rlogo <- image_read("images/Rlogo.jpg")
 sob <- c(bigdata,rlogo, ben10)
-sobre <- image_scale(sob, "500x500")
+sobre <- image_scale(sob,"500x500")
 ```
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
@@ -264,19 +342,20 @@ image_composite(image_scale(bigdata, "x500"),
 
 ## Sobreposição de imagens em gráficos
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-require("png")
-require("ggplot2")
+require("jpeg")
 require("ggpubr")
-library(png)
+library(jpeg)
 library(ggplot2)
 library(ggpubr)
 
-spaceimage <- "C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/space.png"
+peixeimage <- "images/peixe.jpg"
 
-img <- png::readPNG(spaceimage)
+img <- jpeg::readJPEG(peixeimage)
 graph <- ggplot(mpg, aes(x=class, y=hwy, fill=class))
 graph <- graph + background_image(img)
-graph <- graph + geom_boxplot(aes(fill=class), color= "white", alpha=0.1)
+graph <- graph + geom_boxplot(aes(fill=class),
+                              color="white",
+                              alpha=0.85)
 ```
 
 ## Sobreposição de imagens em gráficos
@@ -286,11 +365,11 @@ graph
 
 ## Sobreposição de imagens em gráficos
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
-install.packages("palmerpenguins")
+require("palmerpenguins")
 library(tidyverse)
 library(palmerpenguins)
 
-penguins %>%
+g <- penguins %>%
   count(species) %>%
   ggplot() + geom_col(aes(x = species, y = n, fill = species)) +
   geom_label(aes(x = species, y = n, label = n)) +
@@ -301,91 +380,84 @@ penguins %>%
 
 ## Sobreposição de imagens em gráficos
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-library(magick)
-barpenguin <- image_read("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/barpenguin.png")
-adelie <- image_read("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/adelie.jpg")
-adelie_menor <- image_scale(adelie, "50%")
-adelie_menor
+barpenguin <- image_read("images/barpenguin.png")
+adelie <- image_read("images/adelie.png")
+ad2 <- image_scale(image_rotate(image_background(adelie, "none"),
+                                360), "x350")
+ad2
+```
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+juntos <- image_composite(image_scale(barpenguin,"1400"), 
+                          ad2,offset="+220+120")
+image_write(juntos, path="juntos.pdf", format="pdf")
+```
+
+## Sobreposição de imagens em gráficos
+```{r}
+juntos
 ```
 
 # GIFs
-```{r setup, include=FALSE}
-installed.packages("magick")
-require("magick")
-require(ggplot2)
-require(dplyr)
-require(tidyr)
-require(gifski)
-```
 
+## O que é um Gif
 
-# O que é um Gif
-
- Um  Gif é um formato de imagem, assim como o JPG e PNG. UM gif rata-se de uma junção de imagens de baixa compressão que, quando vistas, dão uma sensação de movimento.
+Um  Gif é um formato de imagem, assim como o JPG e PNG. UM gif trata-se de uma junção de imagens de baixa compressão que, quando vistas, dão uma sensação de movimento.
  
-
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
-gif1 <- image_read("https://media2.giphy.com/media/fUYhyT9IjftxrxJXcE/giphy.gif?cid=ecf05e473971041e0427326d8a81b335f316dd4b5477530f&rid=giphy.gif&ct=g")
-
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE,  }
+image_read("https://media2.giphy.com/media/fUYhyT9IjftxrxJXcE/giphy.gif?cid=ecf05e473971041e0427326d8a81b335f316dd4b5477530f&rid=giphy.gif&ct=g")
 ```
 
-# Para montar um GIF
+## Montagem de GIFs
+
+Para montar um GIF:
 
 Primeiro passo para montar um GIF, importe as imagens que você deseja usar:
-
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE,  }
 # im_1 <- image_read(“C:/Users/nick_/Downloads/im_1.jpg”)
 # im_n <- image_read(“C:/Users/nick_/Downloads/im_n.jpg”)
 ```
 
 Segundo passo é combinar as imagens e fazer a redimensão das imagens:
-
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
-# imag <- c(im_1, ..., im_n)
-# imag <- image_scale(imag, '300x300')
-
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE,  }
+#imag <- c(im_1, ..., im_n)
+#imag <- image_scale(imag, '300x300')
 ```
 
+## Montagem de GIFs
 Depois basta usar a função de animar imagens:
-
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE,  }
 # image_animate(imag)
 ```
 
 Para salvar o GIF:
-
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
-# image_write_gif(imag)
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE,  }
+#image_write_gif(imag)
 ```  
  
-# Exemplo de um GIF
-
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+## Exemplo de um GIF
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 logo <- image_read("https://www.r-project.org/logo/Rlogo.png")
 banana <- image_read("https://jeroen.github.io/images/banana.gif")
 front <- image_scale(banana, "300")
 background <- image_scale(logo, "400")
-frames <- lapply(as.list(front), function(x) image_flatten(c(background, x)))
+frames <- lapply(as.list(front), function(x) 
+  image_flatten(c(background, x)))
 gifbanana <- image_animate(image_join(frames))
-print(gifbanana)
-image_write_gif(image_animate(image_join(frames)), "C:/Users/Artur/Downloads/Rlogo-banana.gif")
-
+image_scale(gifbanana, "270x270")
 ```
-# GIF usando o gglot
 
-## Primeiro vamos construir um gráfico
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+## GIF usando o ggplot
+
+Primeiro vamos construir um gráfico:
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE,  }
 head(ggplot2::txhousing)
-
 ```
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+
+## Construindo o gráfico
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE,  }
 dir_out <- file.path(tempdir(), "tx-sales")
 dir.create(dir_out, recursive = TRUE)
-
-```
-
-
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
 tx_sales <-
   txhousing %>%
   group_by(year,month) %>%
@@ -393,199 +465,163 @@ tx_sales <-
   ungroup() %>%
   mutate(month = factor(month, labels = month.name)) %>%
   complete(month,year)
-
-```
-
-
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
 years <- 
   tx_sales %>%
   pull(year) %>%
   unique(.) %>%
   sort(.)
 
-```
-
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
 most_sold <- max(tx_sales$sales, na.rm = TRUE)
-
 ```
 
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
-for (y in years) {
-  
-  p <-
+## Construindo o gráfico
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE,  }
+for (y in years) { p <-
     tx_sales %>%
     filter(year == y) %>%
     ggplot(aes(month,sales)) +
     geom_col() +
-    scale_y_continuous(limits = c(0, most_sold), breaks = seq(0,1e5, by = 5000)) +
+    scale_y_continuous(limits = c(0, most_sold), 
+                       breaks = seq(0,1e5, by = 5000)) +
     theme_minimal() +
     labs(x = "Month", y = "Total Properties Sold", title = y)
-  
   fp <- file.path(dir_out, paste0(y, ".png"))
-  
   ggsave(plot = p, 
          filename = fp, 
-         device = "png")
-  
-}
-
+         device = "png")}
 ```
 
 ## Criando um GIF a partir do gráfico 
 
-Listando nomes de arquivos e ler
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+Listando nomes de arquivos e ler:
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE,  }
 imgs <- list.files(dir_out, full.names = TRUE)
 img_list <- lapply(imgs, image_read)
-
 ```
 
-Juntamos as imagens
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+Juntamos as imagens:
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE,  }
 img_joined <- image_join(img_list)
-
 ```
 
-Animando os gráficos
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+Animando os gráficos:
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE,  }
 img_animated <- image_animate(img_joined, fps = 2)
-img_animated
 ```
-# Pacote EBImage
+
+## GIF a partir do gráfico
+```{r}
+image_scale(img_animated, "700x700")
+```
 
 # Filtro geométrico do pacote Imager
 
-
-```{r, echo=FALSE}
-library("imager")
-ocean <- load.image("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/ocean.jpg")
-plot(ocean)
-```
-
 ## Quadtrees (filtro geométrico)
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r, echo=FALSE, include=FALSE}
+setwd("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens")
 library(imager)
 library(purrr)
-ocn <- load.image("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/ocean.jpg") %>% imresize(.5)
+ocn <- load.image("images/ocean.jpg") %>% 
+  imresize(.5)
+```
 
-#Dividir ao longo de x, e depois y
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 qsplit <- function(ocn)
-{
-    imsplit(ocn,"x",2) %>% map(~ imsplit(.,"y",2)) %>%
-        flatten 
-}
+{imsplit(ocn,"x",2) %>% map(~ imsplit(.,"y",2)) %>% flatten }
 qsplit(ocn) %>% as.imlist %>% plot
 ```
 
 ## Quadtrees (filtro geométrico)
-
-> - A operação inversa usa "imappend":
-
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 qunsplit <- function(l)
-{
-    list(l[1:2],l[3:4]) %>% map(~ imappend(.,"y")) %>% imappend("x")
-}
-
+{list(l[1:2],l[3:4]) %>% map(~ imappend(.,"y")) %>% imappend("x")}
 qsplit(ocn) %>% qunsplit %>% plot
+
+#Max std. dev imoss channels
+imsd <- function(ocn)
+{imsplit(ocn,"c") %>% map_dbl(sd) %>% max}
 ```
 
 ## Quadtrees (filtro geométrico)
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-#Max std. dev imoss channels
-imsd <- function(ocn)
-{
-    imsplit(ocn,"c") %>% map_dbl(sd) %>% max
-}
-```
-
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 refine <- function(l)
-{
-    if (is.cimg(l)) #We have a leaf
-    {
-        qs <- qsplit(l) #Split
-        if (any(dim(l)[1:2] <= 4)) #Quadrants are very small
-        {
-            qs$sds <- rep(0,4) #Prevent further refinement
-        }
-        else
-        {
-            qs$sds <- map_dbl(qs,imsd) #Store std.dev of children
-        }
-        qs
+{if (is.cimg(l)) #We have a leaf
+  {qs <- qsplit(l) #Split
+    if (any(dim(l)[1:2] <= 4)) #Quadrants are very small
+    {qs$sds <- rep(0,4) #Prevent further refinement
     }
-    else #Not a leaf, explore further
-    {
-        indm <- which.max(l$sds) #Find child with max. std. dev
-        l[[indm]] <- refine(l[[indm]]) #Refine
-        l$sds[indm] <- max(l[[indm]]$sds) #Update std. dev
-        l
+    else
+    {qs$sds <- map_dbl(qs,imsd) #Store std.dev of children
     }
-}
+    qs}
+  else #Not a leaf, explore further
+  {indm <- which.max(l$sds) #Find child with max. std. dev
+    l[[indm]] <- refine(l[[indm]]) #Refine
+    l$sds[indm] <- max(l[[indm]]$sds) #Update std. dev
+    l}}
 ```
 
 ## Quadtrees (filtro geométrico)
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 rebuild <- function(l,borders=FALSE)
 {
-    map(l[-5],~ if (is.cimg(.)) meanim(.,borders=borders) else rebuild(.,borders=borders)) %>% qunsplit
-}
+  map(l[-5],~ if (is.cimg(.)) meanim(.,borders=borders) 
+      else 
+      rebuild(.,borders=borders)) %>% 
+    qunsplit
+  }
 
 #Produce an image that's just the average of image im
 #Optionally, add borders
 meanim <- function(ocn,borders=FALSE)
-{
-    ocn <- imsplit(ocn,"c") %>% map(~ 0*. + mean(.)) %>% imappend("c")
-    if (borders)
-    {
-        ocn[px.borders(ocn)] <- 0
-    }
-    ocn
-}
+{ ocn <- imsplit(ocn,"c") %>% 
+  map(~ 0*. + mean(.)) %>% imappend("c")
+  if (borders) 
+  {ocn[px.borders(ocn)] <- 0} 
+ocn }
 ```
+
 ## Quadtrees (filtro geométrico)
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 iter.refine <- function(ocn,nIter)
-{
-    for (i in seq_len(nIter)) { ocn <- refine(ocn) };
-    ocn
-}
-
+{for (i in seq_len(nIter)) { ocn <- refine(ocn) }
+  ocn} 
 #The first four iterations of the process
+```
+
+## Quadtrees (filtro geométrico)
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 map_il(1:4,~ iter.refine(ocn,.) %>% rebuild) %>% plot
 ```
 
+## Quadtrees (filtro geométrico)
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 iter.refine(ocn,1000) %>% rebuild(borders=T) %>% plot
 ```
 
-# Unshuffling image
+# Unshuffling an image
 
-```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+## Unshuffling an image
+```{r, echo=FALSE}
 library(imager)
-library(purrr)
-set.seed(2)
-
 acr <- load.image("C:/Users/User/OneDrive - unb.br/Documentos/Manipulação de imagens/images/acropolis.jpg")
-
-##reorder the columns of an image
-scramble <- function(acr)
-{
-    imsplit(acr,"x") %>% { .[sample(length(.))] } %>% imappend("x") 
-}
-scramble(acr) %>% plot
 ```
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+set.seed(2)
+scramble <- function(acr) ##reorder the columns of an image
+{ imsplit(acr,"x") %>% { .[sample(length(.))] } %>% imappend("x") }
+scramble(acr) %>% plot
+```
+
+## Unshuffling an image
+```{r, echo=TRUE}
 imlist(acr,scramble(acr)) %>% plot(layout="row")
 ```
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 library(seriation)
-
+library(purrr)
 unscramble <- function(acr.s,method="TSP",...)
 {
     cols <- imsplit(acr.s,"x")
@@ -595,17 +631,16 @@ unscramble <- function(acr.s,method="TSP",...)
     out <- seriate(D,method=method,...)
     cols[get_order(out)] %>% imappend("x") 
 }
-
 scramble(acr) %>% unscramble %>% plot(main="Unscrambled image")
 ```
 
+
+## Unshuffling an image
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 scramble <- function(acr,axis="x")
 {
     imsplit(acr,axis) %>% { .[sample(length(.))] } %>% imappend(axis) 
 }
-
-
 unscramble <- function(acr,axis="x",method="TSP",...)
 {
     cols <- imsplit(acr,axis)
@@ -615,13 +650,12 @@ unscramble <- function(acr,axis="x",method="TSP",...)
     out <- seriate(D,method=method,...)
     cols[get_order(out)] %>% imappend(axis) 
 }
-
 acr.r<- scramble(acr,"x") %>% scramble("y")
-
-#The double scramble produces an unrecognisable mess
+# The double scramble produces an unrecognisable mess
 plot(acr.r)
 ```
 
+## Unshuffling an image
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
 # Inverter a imagem
 unscramble(acr,"y") %>% unscramble("x") %>% 
@@ -635,32 +669,25 @@ unscramble(acr,"y") %>% unscramble("x") %>%
 ## Bibliografia
 
 > - IMAGEM DIGITAL. In: WIKIPÉDIA, a enciclopédia livre. Flórida: Wikimedia Foundation, 2019. Disponível em: [https://pt.wikipedia.org/w/index.php?title=Imagem_digital&oldid=54917444](). Acesso em: 20 ago. 2022.
-
 > - Equipe editorial de Conceito.de. Conceito de imagem digital. **Conceito.de**, 2014. Disponível em [https://conceito.de/imagem-digital](). Acesso em 18 ago. 2022.
-
 > - BARTHELMÉ, Simon. IMAGER: an R package for image processing. **Github**. [https://dahtah.github.io/imager/](). Acesso em 20 ago. 2022.
 
 ## Bibliografia
 
 > - KASSAMBARA, Alboukadel. EASY image processing in r using the magick package.**DataNovia**. Disponível em: [https://www.datanovia.com/en/blog/easy-image-processing-in-r-using-the-magick-package/](). Acesso em 19 ago. 2022.
-
 > - Frery, Alejandro & Perciano, Talita. (2013). **Introduction to Image Processing Using R: Learning by Examples**. 10.1007/978-1-4471-4950-7. Disponível em: [https://www.programmer-books.com/wp-content/uploads/2019/10/Introduction-To-Image-Processing-Using-R.pdf](). Acesso em: 19 ago. 2022.
 
 ## Bibliografia
 
 > - AZEVEDO, Alcinei Mistico. **Aula 5a: Manipulações básicas em imagens no software R**. YOUTUBE, 15 Dez. 2020. Disponível em: [https://www.youtube.com/watch?v=DeP9MUb-P3o](). Acesso em 19 ago. 2022.
-
 > - TechAnswers88. **R: place a jpg or png image overlay in ggplot charts in r**. YOUTUBE, 3 set. 2020. Disponível em [https://www.youtube.com/watch?v=uKw6zp4An5Q](). Acesso em 20 ago. 2022
 
 ## Bibliografia
 
 > - Gorman KB, Williams TD, Fraser WR (2014) Ecological Sexual Dimorphism and Environmental Variability within a Community of Antarctic Penguins (Genus Pygoscelis). PLoS ONE 9(3): e90081.[https://doi.org/10.1371/journal.pone.0090081]()
-
 > - PENGUINS Dataset Overview – iris alternative in R. **R-bloguers**, 2020. Disponível em: [https://www.r-bloggers.com/2020/06/penguins-dataset-overview-iris-alternative-in-r/](). Acesso em 20 ago. 2022.
 
 ## Bibliografia
 
 > - OOMS, Jeroen. rOpenSci: The magick package. rOpenSci . 2022. Disponível em: [https://docs.ropensci.org/magick/index.html]. Acesso em: 23 ago. 2022
-
 > - Create a GIF with R. nagraj. 2019. Disponívem em: [https://www.nagraj.net/notes/gifs-in-r/]. Acesso em: 23 ago. 2022.
-
