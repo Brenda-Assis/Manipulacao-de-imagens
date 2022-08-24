@@ -43,7 +43,7 @@ require(purrr)
     
 3. GIFs;
 
-4. Keras;
+4. Keras e pacote EBImage;
 
 5. Filtro geométrico do pacote Imager.
 
