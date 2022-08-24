@@ -309,7 +309,150 @@ adelie_menor
 ```
 
 # GIFs
+```{r setup, include=FALSE}
+installed.packages("magick")
+require("magick")
+require(ggplot2)
+require(dplyr)
+require(tidyr)
+require(gifski)
+```
 
+
+# O que é um Gif
+
+ Um  Gif é um formato de imagem, assim como o JPG e PNG. UM gif rata-se de uma junção de imagens de baixa compressão que, quando vistas, dão uma sensação de movimento.
+ 
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+gif1 <- image_read("https://media2.giphy.com/media/fUYhyT9IjftxrxJXcE/giphy.gif?cid=ecf05e473971041e0427326d8a81b335f316dd4b5477530f&rid=giphy.gif&ct=g")
+
+```
+
+# Para montar um GIF
+
+Primeiro passo para montar um GIF, importe as imagens que você deseja usar:
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+# im_1 <- image_read(“C:/Users/nick_/Downloads/im_1.jpg”)
+# im_n <- image_read(“C:/Users/nick_/Downloads/im_n.jpg”)
+```
+
+Segundo passo é combinar as imagens e fazer a redimensão das imagens:
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+# imag <- c(im_1, ..., im_n)
+# imag <- image_scale(imag, '300x300')
+
+```
+
+Depois basta usar a função de animar imagens:
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+# image_animate(imag)
+```
+
+Para salvar o GIF:
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+# image_write_gif(imag)
+```  
+ 
+# Exemplo de um GIF
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+logo <- image_read("https://www.r-project.org/logo/Rlogo.png")
+banana <- image_read("https://jeroen.github.io/images/banana.gif")
+front <- image_scale(banana, "300")
+background <- image_scale(logo, "400")
+frames <- lapply(as.list(front), function(x) image_flatten(c(background, x)))
+gifbanana <- image_animate(image_join(frames))
+print(gifbanana)
+image_write_gif(image_animate(image_join(frames)), "C:/Users/Artur/Downloads/Rlogo-banana.gif")
+
+```
+# GIF usando o gglot
+
+## Primeiro vamos construir um gráfico
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+head(ggplot2::txhousing)
+
+```
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+dir_out <- file.path(tempdir(), "tx-sales")
+dir.create(dir_out, recursive = TRUE)
+
+```
+
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+tx_sales <-
+  txhousing %>%
+  group_by(year,month) %>%
+  summarise(sales = sum(sales, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(month = factor(month, labels = month.name)) %>%
+  complete(month,year)
+
+```
+
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+years <- 
+  tx_sales %>%
+  pull(year) %>%
+  unique(.) %>%
+  sort(.)
+
+```
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+most_sold <- max(tx_sales$sales, na.rm = TRUE)
+
+```
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+for (y in years) {
+  
+  p <-
+    tx_sales %>%
+    filter(year == y) %>%
+    ggplot(aes(month,sales)) +
+    geom_col() +
+    scale_y_continuous(limits = c(0, most_sold), breaks = seq(0,1e5, by = 5000)) +
+    theme_minimal() +
+    labs(x = "Month", y = "Total Properties Sold", title = y)
+  
+  fp <- file.path(dir_out, paste0(y, ".png"))
+  
+  ggsave(plot = p, 
+         filename = fp, 
+         device = "png")
+  
+}
+
+```
+
+## Criando um GIF a partir do gráfico 
+
+Listando nomes de arquivos e ler
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+imgs <- list.files(dir_out, full.names = TRUE)
+img_list <- lapply(imgs, image_read)
+
+```
+
+Juntamos as imagens
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+img_joined <- image_join(img_list)
+
+```
+
+Animando os gráficos
+```{r, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+img_animated <- image_animate(img_joined, fps = 2)
+img_animated
+```
 # Pacote EBImage
 
 # Filtro geométrico do pacote Imager
@@ -514,4 +657,10 @@ unscramble(acr,"y") %>% unscramble("x") %>%
 > - Gorman KB, Williams TD, Fraser WR (2014) Ecological Sexual Dimorphism and Environmental Variability within a Community of Antarctic Penguins (Genus Pygoscelis). PLoS ONE 9(3): e90081.[https://doi.org/10.1371/journal.pone.0090081]()
 
 > - PENGUINS Dataset Overview – iris alternative in R. **R-bloguers**, 2020. Disponível em: [https://www.r-bloggers.com/2020/06/penguins-dataset-overview-iris-alternative-in-r/](). Acesso em 20 ago. 2022.
+
+## Bibliografia
+
+> - OOMS, Jeroen. rOpenSci: The magick package. rOpenSci . 2022. Disponível em: [https://docs.ropensci.org/magick/index.html]. Acesso em: 23 ago. 2022
+
+> - Create a GIF with R. nagraj. 2019. Disponívem em: [https://www.nagraj.net/notes/gifs-in-r/]. Acesso em: 23 ago. 2022.
 
