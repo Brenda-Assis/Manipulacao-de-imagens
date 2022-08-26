@@ -12,4 +12,4 @@ Dentro da mesma pasta há outra pasta chamada "intro", na qual estão as imagens
 
 - Para visualizar o gráfico de barras usado no exemplo de espécies de penguins do tópico de sobreposição de imagens no r acesse o arquivo "Barplot_penguins.R".
 
-- Para acessar o conteúdo de reconhecimento de imagens usando o Keras, abra a pasta "Recon. d imagem". Também é possível visualizá-lo na nuvem https://1drv.ms/u/s!AvqM4gLN1xPemu1q89-WTxGV9q6VAg?e=d6JTZu
+- Para acessar o conteúdo de reconhecimento de imagens usando o Keras, abra a pasta "Reconhecimento de imagem". Também é possível visualizá-lo na nuvem https://1drv.ms/u/s!AvqM4gLN1xPemu1q89-WTxGV9q6VAg?e=d6JTZu
