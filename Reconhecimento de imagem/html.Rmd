@@ -1,0 +1,182 @@
+---
+title: "Manipulação de Imagens"
+author: "Artur Almeida, Brenda Assis, Eraldo Jair e Rafael Yui"
+date: "24 de agosto de 2022"
+output:
+  slidy_presentation: default
+  beamer_presentation: default
+  ioslides_presentation:
+    logo: "https://github.com/Brenda-Assis/Manipulacao-de-imagens/blob/master/marcaunb.png"
+---
+
+## KERAS
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, echo = TRUE)
+```
+Keras é uma biblioteca aberta de Deep Learning implementada utilizando a base do TensorFlow para diversas linguagens/plataformas, como Python e R, como foco na sua facilidade para utilização. Ela permite modelar e treinar modelos de redes neurais com poucas linhas de código.
+
+Nesse exemplo, vamos utilizar o Keras para criar um modelo capaz de classificar imagens em carros ou aviões.
+
+
+![AVIÕES](C:/Users/erald/OneDrive/Área de Trabalho/eraldo-bkp/== U N B - E S T A T/-=2022.1=-/CE2 - R/=SEMINÁRIO/verifica/images (4).jpg)
+![CARROS](C:/Users/erald/OneDrive/Área de Trabalho/eraldo-bkp/== U N B - E S T A T/-=2022.1=-/CE2 - R/=SEMINÁRIO/verifica/images (2).jpg)
+
+
+
+## 1 -  Carregando os dados
+
+```{r echo=FALSE}
+setwd("C:/Users/erald/OneDrive/Área de Trabalho/eraldo-bkp/== U N B - E S T A T/-=2022.1=-/CE2 - R/=SEMINÁRIO")
+
+library(EBImage)
+library(keras) 
+library(caret)
+library (pbapply)
+library(tensorflow)
+```
+
+```{r, echo=TRUE}
+car_dir <- "carros/"
+planes_dir <- "avioes/"
+verifica_dir <- "verifica/"
+```
+
+## 1 -  Carregando os dados
+```{r}
+car_dir <- "carros/"
+planes_dir <- "avioes/"
+verifica_dir <- "verifica/"
+
+
+width <- 30
+height <- 30
+
+extrair_caracteristicas <- function (dir_path, width, height){
+  
+  img.size <- width * height
+  image_name <- list.files(dir_path)
+  print(paste("Iniciando Processo", length(image_name), "imagens"))
+  
+  lista_parametros <- pblapply(image_name, function(imgname){
+    img <- readImage(file.path(dir_path, imgname))
+    img_resized <- resize(img, w = width, h = height)
+    img_matrix <- as.matrix(img_resized@.Data)
+    img_vector <- as.vector(t(img_matrix))
+    
+    return(img_vector)
+  })
+  
+  feature_matrix <- do.call(rbind, lista_parametros)
+  feature_matrix <- as.data.frame(feature_matrix)
+  
+  names(feature_matrix) <- paste0("pixel", c(1:img.size))
+  return(feature_matrix)
+}
+
+```
+
+## 1 -  Carregando os dados
+```{r, echo=TRUE, message=FALSE}
+car_data <- extrair_caracteristicas(dir_path = car_dir, width = width, 
+                                    height = height)
+planes_data <- extrair_caracteristicas(dir_path = planes_dir, 
+                                       width = width, height = height)
+car_data$label <- 0
+planes_data$label <- 1
+allData <-rbind(car_data,planes_data)   # juntar os dados
+```
+
+## 2 -	Criar o modelo utilizando Keras
+- Modelos Keras são definidos como uma sequência de camadas. 
+
+- Esse projeto teste utiliza poucas camadas, as quais as primeiras utilizam a função de ativação ReLU e a função Softmax na última. 
+
+-Podemos especificar o número de neurônios no primeiro argumento, e a função de ativação com o parâmetro activation
+
+## 2 -	Criar o modelo utilizando Keras
+```{r}
+indices <- createDataPartition(allData$label, p=0.9 , list = FALSE)  #caret# criação dos indices para treinamento dos dados - 90%
+train <- allData[indices,] # treino
+test <- allData[-indices,] # teste
+
+trainLabels <- to_categorical(train$label)
+testLabels <- to_categorical(test$label)
+
+testLabels
+
+xtrain <- data.matrix(train[,-ncol(train)])
+ytrain <- data.matrix(train[,ncol(train)])
+
+xtest <- data.matrix(test[,-ncol(test)])
+ytest <- data.matrix(test[,ncol(test)])
+
+```
+
+
+
+## 3 -  Compilando o modelo
+
+Após  modelo definido, é necessário compilá-lo. A compilação ocorre utilizando a biblioteca  TensorFlow
+
+Ao compilar, precisamos especificar algumas propriedades, como a função de perda, otimizador e a métrica que será utilizada para avaliar o modelo. Neste projeto, utilizamos a função de perda de Entropia Cruzada Binária, o otimizador Adam (que utiliza o gradiente descendente) e acurácia como métrica.
+```{r}
+#####TREINAR MODELO (KERAS)
+model <- keras_model_sequential()
+model %>%
+  layer_dense(units = 256, activation = 'relu', input_shape = c(2700)) %>%  ##1A layer
+  layer_dense(units = 128, activation = 'relu')%>%
+  layer_dense(units = 64, activation = 'relu')%>%
+  layer_dense(units = 32, activation = 'relu')%>%
+  layer_dense(units = 2, activation = 'softmax')
+
+summary(model)
+
+model%>%
+  compile(loss='binary_crossentropy',
+          optimizer = optimizer_adam(),
+          metrics = c('accuracy')
+          )
+
+```
+
+
+## 4 -  Treinando o modelo
+
+Como nosso modelo definido e compilado, precisamos treiná-lo, ou seja, executar o modelo utilizando nossos dados.
+
+O treinamento ocorre através de epochs, e cada época é dividida em lotes, onde uma época é uma passagem por todas as linhas do conjunto de testes, e um lote é composto de uma ou mais amostras (quantidade definida pelo usuário) consideradas pelo modelo antes que seja feita a atualização dos seus pesos.
+
+```{r}
+history <- model %>%
+  fit(xtrain,
+      trainLabels,
+      epochs = 10,
+      batch_size = 32,
+      validation_split = 0.2)
+
+plot(history)
+
+```
+
+
+
+
+## 5 -  Avaliando o modelo
+Agora que estamos com nosso modelo treinado, precisamos avaliá-lo. Essa avaliação vai dizer o quão bem o modelo foi construído utilizando o conjunto de dados de treinamento. 
+
+
+Pode-se separar os dados entre dados de treinamento e de teste para avaliar o desempenho do modelo com novos dado.
+
+Para avaliar como o modelo se comportou para os dados de treinamento, basta passar os mesmos dados de entrada e saída para a função evaluate() . Essa função retorna uma lista com a perda e a acurácia do modelo para o conjunto de dados.
+```{r}
+model %>% evaluate(xtest, testLabels, verbose = 1)
+
+pred <- model %>% predict(xtest)  %>% k_argmax()
+table(Predicted = as.numeric(pred), Reais = ytest)
+
+
+verifica<-extrair_caracteristicas(verifica_dir, width = width, height = height)
+pred_test <- model %>% predict(as.matrix(verifica)) %>% k_argmax()
+pred_test
+```
+
